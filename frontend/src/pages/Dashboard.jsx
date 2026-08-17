@@ -183,7 +183,7 @@ const Dashboard = () => {
                     <span style={{ fontWeight: 'bold' }}>{statusCounts.Available}</span>
                   </div>
                   <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts.Available / totalVehicles) * 100 : 0}%`, background: 'var(--status-available)' }}></div>
+                    <div style={{ height: '100%', width: `${kpis.totalVehicles > 0 ? (statusCounts.Available / kpis.totalVehicles) * 100 : 0}%`, background: 'var(--status-available)' }}></div>
                   </div>
                 </div>
 
@@ -193,7 +193,7 @@ const Dashboard = () => {
                     <span style={{ fontWeight: 'bold' }}>{statusCounts['On Trip']}</span>
                   </div>
                   <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts['On Trip'] / totalVehicles) * 100 : 0}%`, background: 'var(--color-primary)' }}></div>
+                    <div style={{ height: '100%', width: `${kpis.totalVehicles > 0 ? (statusCounts['On Trip'] / kpis.totalVehicles) * 100 : 0}%`, background: 'var(--color-primary)' }}></div>
                   </div>
                 </div>
 
@@ -203,7 +203,7 @@ const Dashboard = () => {
                     <span style={{ fontWeight: 'bold' }}>{statusCounts['In Shop']}</span>
                   </div>
                   <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts['In Shop'] / totalVehicles) * 100 : 0}%`, background: 'var(--status-inshop)' }}></div>
+                    <div style={{ height: '100%', width: `${kpis.totalVehicles > 0 ? (statusCounts['In Shop'] / kpis.totalVehicles) * 100 : 0}%`, background: 'var(--status-inshop)' }}></div>
                   </div>
                 </div>
 
@@ -213,7 +213,7 @@ const Dashboard = () => {
                     <span style={{ fontWeight: 'bold' }}>{statusCounts.Retired}</span>
                   </div>
                   <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts.Retired / totalVehicles) * 100 : 0}%`, background: 'var(--status-retired)' }}></div>
+                    <div style={{ height: '100%', width: `${kpis.totalVehicles > 0 ? (statusCounts.Retired / kpis.totalVehicles) * 100 : 0}%`, background: 'var(--status-retired)' }}></div>
                   </div>
                 </div>
               </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { getAnalyticsOverview, getVehicleRoi, getCostliestVehicles } from '../services/reportService';
 import { AuthContext } from '../context/AuthContext';
-import { ShieldAlert, Download, BarChart2, Coins, ArrowUpRight, Percent, Navigation, Wrench } from 'lucide-react';
+import { ShieldAlert, Download, BarChart2, Coins, ArrowUpRight, Percent, Navigation, Wrench, DollarSign } from 'lucide-react';
 
 const Analytics = () => {
   const { user } = useContext(AuthContext);
