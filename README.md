@@ -42,25 +42,35 @@ TransitOps/
    ```
 
 2. **Configure Environment Variables**:
-   Copy `.env.example` in the root (or in the `backend/` directory) to `.env` and fill in your database connections and secrets:
+   Copy `.env.example` in the root to `.env`:
    ```bash
    cp .env.example .env
    ```
+   Fill in your local MongoDB URI connection string and a secret string for JWT signatures.
 
 3. **Install Dependencies**:
    Install root, backend, and frontend dependencies:
    ```bash
-   # From root:
-   npm install
+   npm run install-all
    ```
 
-4. **Run in Development**:
-   To start both backend and frontend concurrently:
+4. **Seed the Database**:
+   Populate the collections with mock fleet data, safety profiles, and role-based test users:
+   ```bash
+   npm run seed
+   ```
+
+5. **Run in Development**:
+   Start both backend and frontend servers concurrently:
    ```bash
    npm run dev
    ```
 
 ---
 
+## Testing & Roles
+The application enforces strict **Role-Based Access Control (RBAC)**.
+For default testing credentials (emails, passwords, and permissions) for the Fleet Manager, Dispatcher, Safety Officer, and Financial Analyst roles, please refer to the detailed [credential.md](credential.md) file.
+
 ## Design and Plan
-For details on system design, database models, and API endpoints, check out the [PLAN.md](PLAN.md) document in the root workspace.
+For details on system design, Mongoose database schemas, and Express API routes, refer to the [PLAN.md](PLAN.md) document in the workspace.
