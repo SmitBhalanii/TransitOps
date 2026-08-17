@@ -1,31 +1,45 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { loginUser, logoutUser, getMeUser } from '../services/authService';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Mock authentication state for Phase 1
-  const [user, setUser] = useState({
-    name: 'Raven K.',
-    email: 'raven.k@transitops.in',
-    role: 'dispatcher', // Default mock role matching wireframe user profile
-  });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Check auth session on startup
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await getMeUser();
+        if (response.status === 'success' && response.data.user) {
+          setUser(response.data.user);
+        }
+      } catch (err) {
+        // No active session, user remains null (ignore console logs for 401 on startup)
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const login = async (email, password, role) => {
     setLoading(true);
     setError(null);
     try {
-      // Mock login implementation
-      setUser({
-        name: role.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-        email: email,
-        role: role,
-      });
-      setLoading(false);
-      return true;
+      const response = await loginUser(email, password, role);
+      if (response.status === 'success' && response.data.user) {
+        setUser(response.data.user);
+        setLoading(false);
+        return true;
+      }
+      throw new Error('Unexpected response format');
     } catch (err) {
-      setError(err.message || 'Login failed');
+      const msg = err.response?.data?.message || err.message || 'Login failed';
+      setError(msg);
       setLoading(false);
       return false;
     }
@@ -34,9 +48,11 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setLoading(true);
     try {
+      await logoutUser();
       setUser(null);
-      setLoading(false);
     } catch (err) {
+      console.error('Logout error', err);
+    } finally {
       setLoading(false);
     }
   };

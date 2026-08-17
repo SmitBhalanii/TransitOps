@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import errorHandler from './middleware/errorMiddleware.js';
 import healthRouter from './routes/healthRoutes.js';
+import authRouter from './routes/authRoutes.js';
+import userRouter from './routes/userRoutes.js';
 import AppError from './utils/appError.js';
 
 // Load environment variables
@@ -23,6 +25,9 @@ app.use(express.json());
 
 // API Routes
 app.use('/api', healthRouter);
+app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
+
 
 // Fallback for unhandled API routes
 app.all('*', (req, res, next) => {
