@@ -14,6 +14,7 @@ import fuelRouter from './routes/fuelRoutes.js';
 import expenseRouter from './routes/expenseRoutes.js';
 import dashboardRouter from './routes/dashboardRoutes.js';
 import reportRouter from './routes/reportRoutes.js';
+import settingsRouter from './routes/settingsRoutes.js';
 import AppError from './utils/appError.js';
 
 // Load environment variables
@@ -43,6 +44,7 @@ app.use('/api/fuel', fuelRouter);
 app.use('/api/expenses', expenseRouter);
 app.use('/api/dashboard', dashboardRouter);
 app.use('/api/reports', reportRouter);
+app.use('/api/settings', settingsRouter);
 
 
 // Fallback for unhandled API routes
