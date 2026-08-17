@@ -163,53 +163,81 @@ erDiagram
 
 ## REST API Plan
 
-### Authentication Router (`/api/auth`)
-*   `POST /login` - User login (Returns JWT, sets HTTP-only cookie).
-*   `POST /logout` - Clears cookie.
-*   `GET /me` - Returns active user details.
-*   `POST /register` - Register a new user (Admin-only).
+### 1. Authentication & User API (`/api/auth` & `/api/users`)
+*   `POST /api/auth/login` - Authenticate user and generate JWT token
+*   `POST /api/auth/logout` - Log out the authenticated user
+*   `GET /api/users` - Retrieve all users
+*   `GET /api/users/:id` - Retrieve a specific user
+*   `POST /api/users` - Create a new user
+*   `PUT /api/users/:id` - Update user information
+*   `DELETE /api/users/:id` - Delete a user
 
-### Vehicles Router (`/api/vehicles`)
-*   `GET /` - List all vehicles (supports filtering by `type`, `status`, and `search`).
-*   `GET /:id` - Get vehicle details.
-*   `POST /` - Add a new vehicle (Fleet Manager/Admin).
-*   `PUT /:id` - Update vehicle details (Fleet Manager/Admin).
-*   `DELETE /:id` - Retire/delete vehicle (Fleet Manager/Admin).
+### 2. Vehicle API (`/api/vehicles`)
+*   `GET /api/vehicles` - Retrieve all vehicles
+*   `GET /api/vehicles/:id` - Retrieve details of a specific vehicle
+*   `POST /api/vehicles` - Register a new vehicle
+*   `PUT /api/vehicles/:id` - Update vehicle information
+*   `DELETE /api/vehicles/:id` - Delete a retired vehicle
 
-### Drivers Router (`/api/drivers`)
-*   `GET /` - List all drivers (supports filtering by `status`, expired license filter, and `search`).
-*   `GET /:id` - Get driver profile.
-*   `POST /` - Register new driver (Safety Officer/Admin).
-*   `PUT /:id` - Update driver profile (Safety Officer/Admin).
-*   `PUT /:id/suspend` - Suspend a driver (Safety Officer/Admin).
+### 3. Driver API (`/api/drivers`)
+*   `GET /api/drivers` - Retrieve all drivers
+*   `GET /api/drivers/:id` - Retrieve details of a specific driver
+*   `POST /api/drivers` - Register a new driver
+*   `PUT /api/drivers/:id` - Update driver information
+*   `DELETE /api/drivers/:id` - Delete a driver record
 
-### Trips Router (`/api/trips`)
-*   `GET /` - List trips (live board and history).
-*   `POST /` - Create trip draft (Dispatcher/Admin).
-*   `PUT /:id` - Update trip details (Dispatcher/Admin).
-*   `POST /:id/dispatch` - Dispatch trip (Enforces validations, sets vehicle/driver to "On Trip") (Dispatcher/Admin).
-*   `POST /:id/complete` - Complete trip (Updates vehicle odometer, adds fuel/expense records, frees vehicle/driver) (Dispatcher/Admin).
-*   `POST /:id/cancel` - Cancel trip (Restores vehicle/driver status) (Dispatcher/Admin).
+### 4. Trip API (`/api/trips`)
+*   `GET /api/trips` - Retrieve all trips
+*   `GET /api/trips/:id` - Retrieve details of a specific trip
+*   `POST /api/trips` - Create a new trip
+*   `PUT /api/trips/:id` - Update trip information or status
+*   `DELETE /api/trips/:id` - Delete or remove a trip
+*   `PUT /api/trips/:id/dispatch` - Dispatch a trip
+*   `PUT /api/trips/:id/complete` - Mark a trip as completed
+*   `PUT /api/trips/:id/cancel` - Cancel a trip
 
-### Maintenance Router (`/api/maintenance`)
-*   `GET /` - List maintenance history.
-*   `POST /` - Create service record (Updates vehicle to "In Shop") (Fleet Manager/Admin).
-*   `PUT /:id/close` - Close maintenance record (Saves final cost, updates vehicle back to "Available") (Fleet Manager/Admin).
+### 5. Maintenance API (`/api/maintenance`)
+*   `GET /api/maintenance` - Retrieve all maintenance records
+*   `GET /api/maintenance/:id` - Retrieve a specific maintenance record
+*   `POST /api/maintenance` - Create a new maintenance record
+*   `PUT /api/maintenance/:id` - Update maintenance information
+*   `DELETE /api/maintenance/:id` - Delete a maintenance record
+*   `PUT /api/maintenance/:id/close` - Close a completed maintenance record
+*   `GET /api/vehicles/:id/maintenance` - Retrieve maintenance history of a vehicle
 
-### Expenses & Fuel Router (`/api/expenses`)
-*   `GET /fuel` - Get fuel logs.
-*   `POST /fuel` - Log fuel (Financial Analyst/Admin).
-*   `GET /other` - List miscellaneous expenses (toll, misc).
-*   `POST /other` - Log manual expense (Financial Analyst/Admin).
-*   `GET /operational-cost` - Calculate aggregated operational cost (Auto sum of fuel + maintenance + other).
+### 6. Fuel Log API (`/api/fuel-logs`)
+*   `GET /api/fuel-logs` - Retrieve all fuel records
+*   `GET /api/fuel-logs/:id` - Retrieve a specific fuel record
+*   `POST /api/fuel-logs` - Add a new fuel record
+*   `PUT /api/fuel-logs/:id` - Update a fuel record
+*   `DELETE /api/fuel-logs/:id` - Delete a fuel record
 
-### Analytics Router (`/api/analytics`)
-*   `GET /dashboard` - Get home dashboard KPIs (fleet utilization, active trip counters).
-*   `GET /reports` - Get detailed reports (fuel efficiency, ROI, monthly revenue chart data).
+### 7. Expense API (`/api/expenses`)
+*   `GET /api/expenses` - Retrieve all expense records
+*   `GET /api/expenses/:id` - Retrieve a specific expense
+*   `POST /api/expenses` - Record a new expense
+*   `PUT /api/expenses/:id` - Update an expense record
+*   `DELETE /api/expenses/:id` - Delete an expense record
 
-### Settings Router (`/api/settings`)
-*   `GET /` - Retrieve system configuration.
-*   `PUT /` - Update system configuration (Admin-only).
+### 8. Dashboard API (`/api/dashboard`)
+*   `GET /api/dashboard` - Retrieve dashboard statistics
+*   `GET /api/dashboard/vehicles` - Retrieve vehicle-related dashboard statistics
+*   `GET /api/dashboard/trips` - Retrieve trip-related dashboard statistics
+*   `GET /api/dashboard/drivers` - Retrieve driver-related dashboard statistics
+*   `GET /api/dashboard/recent-activities` - Retrieve recent system activities
+
+### 9. Reports and Analytics API (`/api/reports`)
+*   `GET /api/reports` - Retrieve available reports
+*   `GET /api/reports/fuel-efficiency` - Generate fuel efficiency report
+*   `GET /api/reports/fleet-utilization` - Generate fleet utilization report
+*   `GET /api/reports/vehicle-roi` - Calculate vehicle ROI
+*   `GET /api/reports/vehicle-performance` - Generate vehicle performance report
+*   `GET /api/reports/export/csv` - Export report in CSV format
+
+### 10. Settings API (`/api/settings`)
+*   `GET /api/settings` - Retrieve system configuration
+*   `PUT /api/settings` - Update system configuration (Admin-only)
+
 
 ---
 
