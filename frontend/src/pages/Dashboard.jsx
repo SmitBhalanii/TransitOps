@@ -1,131 +1,291 @@
-import React from 'react';
-import { Shield, CheckCircle, AlertTriangle, AlertCircle, TrendingUp, Users } from 'lucide-react';
+import React, { useState, useEffect, useContext } from 'react';
+import { getDashboardStats } from '../services/dashboardService';
+import { AuthContext } from '../context/AuthContext';
+import { ShieldAlert, Play, CheckCircle, Ban, Calendar, User, Truck, ShieldCheck, Activity, BarChart2 } from 'lucide-react';
 
 const Dashboard = () => {
-  // Mock data for Phase 1
-  const kpis = [
-    { label: 'Active Vehicles', value: '53', color: 'amber', icon: <TrendingUp size={20} /> },
-    { label: 'Available Vehicles', value: '42', color: 'green', icon: <CheckCircle size={20} /> },
-    { label: 'Vehicles in Maintenance', value: '05', color: 'orange', icon: <AlertTriangle size={20} /> },
-    { label: 'Active Trips', value: '18', color: 'blue', icon: <Shield size={20} /> },
-    { label: 'Pending Trips', value: '09', color: 'blue', icon: <Shield size={20} /> },
-    { label: 'Drivers on Duty', value: '26', color: 'amber', icon: <Users size={20} /> },
-    { label: 'Fleet Utilization', value: '81%', color: 'green', icon: <TrendingUp size={20} /> },
-  ];
+  const { user } = useContext(AuthContext);
+  const [kpis, setKpis] = useState(null);
+  const [statusCounts, setStatusCounts] = useState(null);
+  const [recentTrips, setRecentTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const recentTrips = [
-    { code: 'TR001', vehicle: 'VAN-05', driver: 'Alex', status: 'On Trip', eta: '45 min' },
-    { code: 'TR002', vehicle: 'TRK-12', driver: 'John', status: 'Completed', eta: '—' },
-    { code: 'TR003', vehicle: 'MINI-08', driver: 'Priya', status: 'Dispatched', eta: '1h 10m' },
-    { code: 'TR004', vehicle: '—', driver: '—', status: 'Draft', eta: 'Awaiting vehicle' },
-  ];
+  // Type filter: All, Van, Truck, Mini
+  const [typeFilter, setTypeFilter] = useState('All');
 
-  const statusBars = [
-    { label: 'Available', count: 42, percentage: 70, color: 'var(--status-available)' },
-    { label: 'On Trip', count: 18, percentage: 20, color: 'var(--status-ontrip)' },
-    { label: 'In Shop', count: 5, percentage: 7, color: 'var(--status-inshop)' },
-    { label: 'Retired', count: 2, percentage: 3, color: 'var(--status-retired)' },
-  ];
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const filters = {};
+      if (typeFilter !== 'All') filters.type = typeFilter;
+
+      const response = await getDashboardStats(filters);
+      if (response.status === 'success') {
+        setKpis(response.data.kpis);
+        setStatusCounts(response.data.vehicleStatusCounts);
+        setRecentTrips(response.data.recentTrips);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to load dashboard metrics');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [typeFilter]);
 
   return (
     <div className="page-container">
-      <div className="page-header">
+      {/* Greeting Header */}
+      <div className="page-header" style={{ marginBottom: '20px' }}>
         <div className="page-title">
-          <h1>Dashboard</h1>
-          <p>Real-time fleet operations overview</p>
+          <h1>Operations Dashboard</h1>
+          <p>Real-time fleet tracking, status distribution, and driver allocations</p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div className="badge badge-admin" style={{ padding: '6px 12px', textTransform: 'capitalize' }}>
+            Role: {user?.role ? user.role.replace('_', ' ') : 'Guest'}
+          </div>
+          <select
+            className="filter-select"
+            style={{ padding: '8px 16px', background: 'var(--bg-secondary)', color: 'var(--color-text)', border: '1px solid var(--border-color)' }}
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+          >
+            <option value="All">Filter Type: All</option>
+            <option value="Van">Van</option>
+            <option value="Truck">Truck</option>
+            <option value="Mini">Mini</option>
+          </select>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="filter-bar">
-        <select className="filter-select" defaultValue="All">
-          <option value="All">Vehicle Type: All</option>
-          <option value="Van">Van</option>
-          <option value="Truck">Truck</option>
-          <option value="Mini">Mini</option>
-        </select>
-        <select className="filter-select" defaultValue="All">
-          <option value="All">Status: All</option>
-          <option value="Available">Available</option>
-          <option value="On Trip">On Trip</option>
-          <option value="In Shop">In Shop</option>
-        </select>
-        <select className="filter-select" defaultValue="All">
-          <option value="All">Region: All</option>
-          <option value="North">North</option>
-          <option value="East">East</option>
-          <option value="West">West</option>
-          <option value="South">South</option>
-        </select>
-      </div>
+      {loading && (
+        <div className="spinner-container" style={{ minHeight: '240px' }}>
+          <div className="spinner"></div>
+        </div>
+      )}
 
-      {/* KPI Cards */}
-      <div className="card-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))' }}>
-        {kpis.map((kpi, idx) => (
-          <div key={idx} className={`kpi-card ${kpi.color}`}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span className="kpi-title">{kpi.label}</span>
-              <div style={{ color: `var(--status-${kpi.color === 'amber' ? 'inshop' : kpi.color})` }}>
-                {kpi.icon}
+      {error && (
+        <div className="alert alert-danger" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <ShieldAlert size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {!loading && !error && kpis && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          
+          {/* Operations KPI Metrics Grid */}
+          <div className="grid-4" style={{ gap: '16px' }}>
+            
+            <div className="card" style={{ padding: '20px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Active Vehicles
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text)', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span>{kpis.activeVehicles}</span>
+                <span style={{ fontSize: '12px', color: 'var(--status-available)', fontWeight: 'normal' }}>
+                  / {kpis.totalVehicles} total
+                </span>
+              </div>
+              <div style={{ height: '4px', background: 'var(--border-color)', borderRadius: '2px', marginTop: '12px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${kpis.totalVehicles > 0 ? (kpis.activeVehicles / kpis.totalVehicles) * 100 : 0}%`, background: 'var(--color-primary)' }}></div>
               </div>
             </div>
-            <div className="kpi-value">{kpi.value}</div>
-          </div>
-        ))}
-      </div>
 
-      <div className="grid-2">
-        {/* Recent Trips Table */}
-        <div>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#f3f4f6', marginBottom: '16px' }}>Recent Trips</h3>
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Trip</th>
-                  <th>Vehicle</th>
-                  <th>Driver</th>
-                  <th>Status</th>
-                  <th>ETA</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTrips.map((trip, idx) => (
-                  <tr key={idx}>
-                    <td style={{ fontFamily: 'var(--font-title)', fontWeight: 600 }}>{trip.code}</td>
-                    <td>{trip.vehicle}</td>
-                    <td>{trip.driver}</td>
-                    <td>
-                      <span className={`badge badge-${trip.status.toLowerCase().replace(' ', '')}`}>
-                        {trip.status}
-                      </span>
-                    </td>
-                    <td style={{ color: trip.eta === '—' ? 'var(--color-text-dimmed)' : 'var(--color-text)' }}>{trip.eta}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            <div className="card" style={{ padding: '20px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Available Vehicles
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--status-available)' }}>
+                {kpis.availableVehicles}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', marginTop: '8px' }}>
+                Ready for dispatch assignment
+              </div>
+            </div>
 
-        {/* Vehicle Status Distributions */}
-        <div>
-          <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#f3f4f6', marginBottom: '16px' }}>Vehicle Status</h3>
-          <div className="table-container" style={{ padding: '24px' }}>
-            {statusBars.map((bar, idx) => (
-              <div key={idx} style={{ marginBottom: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ fontWeight: 555 }}>{bar.label}</span>
-                  <span style={{ color: 'var(--color-text-muted)' }}>{bar.count} vehicles ({bar.percentage}%)</span>
+            <div className="card" style={{ padding: '20px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Vehicles In Maintenance
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--status-inshop)' }}>
+                {kpis.vehiclesInMaintenance}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', marginTop: '8px' }}>
+                Currently in shop schedules
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '20px', border: '1px solid var(--color-primary)' }}>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Fleet Utilization
+              </div>
+              <div style={{ fontSize: '28px', fontWeight: 800, color: 'var(--color-text)' }}>
+                {kpis.fleetUtilization}%
+              </div>
+              <div style={{ height: '4px', background: 'var(--border-color)', borderRadius: '2px', marginTop: '12px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${kpis.fleetUtilization}%`, background: 'var(--color-primary)' }}></div>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="grid-3" style={{ gap: '16px' }}>
+            
+            <div className="card" style={{ padding: '20px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Active Dispatches
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-primary)' }}>
+                {kpis.activeTrips}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '20px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Pending Drafts
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--color-text)' }}>
+                {kpis.pendingTrips}
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: '20px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--color-text-dimmed)', textTransform: 'uppercase', marginBottom: '4px' }}>
+                Drivers On Duty
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--status-available)' }}>
+                {kpis.driversOnDuty}
+              </div>
+            </div>
+
+          </div>
+
+          <div className="grid-3" style={{ gap: '24px', alignItems: 'start' }}>
+            
+            {/* Live Vehicle Status Breakdown Progress list */}
+            <div className="card" style={{ gridColumn: 'span 1', padding: '24px' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '20px' }}>
+                <BarChart2 size={18} style={{ color: 'var(--color-primary)' }} />
+                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0 }}>Vehicle Status Share</h3>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
+                    <span>Available</span>
+                    <span style={{ fontWeight: 'bold' }}>{statusCounts.Available}</span>
+                  </div>
+                  <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts.Available / totalVehicles) * 100 : 0}%`, background: 'var(--status-available)' }}></div>
+                  </div>
                 </div>
-                <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '100px', overflow: 'hidden' }}>
-                  <div style={{ width: `${bar.percentage}%`, height: '100%', backgroundColor: bar.color, borderRadius: '100px' }}></div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
+                    <span>On Trip</span>
+                    <span style={{ fontWeight: 'bold' }}>{statusCounts['On Trip']}</span>
+                  </div>
+                  <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts['On Trip'] / totalVehicles) * 100 : 0}%`, background: 'var(--color-primary)' }}></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
+                    <span>In Shop</span>
+                    <span style={{ fontWeight: 'bold' }}>{statusCounts['In Shop']}</span>
+                  </div>
+                  <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts['In Shop'] / totalVehicles) * 100 : 0}%`, background: 'var(--status-inshop)' }}></div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '4px' }}>
+                    <span>Retired</span>
+                    <span style={{ fontWeight: 'bold' }}>{statusCounts.Retired}</span>
+                  </div>
+                  <div style={{ height: '6px', background: 'var(--border-color)', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${totalVehicles > 0 ? (statusCounts.Retired / totalVehicles) * 100 : 0}%`, background: 'var(--status-retired)' }}></div>
+                  </div>
                 </div>
               </div>
-            ))}
+            </div>
+
+            {/* Recent activities/trips panel */}
+            <div className="card" style={{ gridColumn: 'span 2', padding: '24px' }}>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '20px' }}>
+                <Activity size={18} style={{ color: 'var(--color-primary)' }} />
+                <h3 style={{ fontSize: '15px', fontWeight: 700, margin: 0 }}>Recent Activities</h3>
+              </div>
+
+              {recentTrips.length === 0 ? (
+                <div className="empty-state" style={{ minHeight: '120px' }}>
+                  <p>No recent dispatches logged</p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {recentTrips.map((trip) => (
+                    <div
+                      key={trip._id}
+                      style={{
+                        padding: '14px',
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        background: 'rgba(255, 255, 255, 0.02)',
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <span style={{ fontFamily: 'var(--font-title)', fontWeight: 600, color: 'var(--color-text)', fontSize: '13px' }}>
+                            {trip.tripCode}
+                          </span>
+                          <span className={`badge badge-${trip.status.toLowerCase()}`} style={{ fontSize: '10px', padding: '1px 6px' }}>
+                            {trip.status}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                          {trip.source} → {trip.destination}
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: 'var(--color-text-dimmed)', marginTop: '4px' }}>
+                          <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                            <Truck size={10} /> {trip.vehicle?.registrationNumber || 'Retired'}
+                          </span>
+                          <span style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                            <User size={10} /> {trip.driver?.name || 'Unassigned'}
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--color-text)' }}>
+                          ₹{trip.revenue.toLocaleString()}
+                        </div>
+                        {trip.eta && (
+                          <div style={{ fontSize: '10px', color: 'var(--color-text-dimmed)', marginTop: '2px' }}>
+                            ETA: {trip.eta}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
           </div>
+
         </div>
-      </div>
+      )}
     </div>
   );
 };
