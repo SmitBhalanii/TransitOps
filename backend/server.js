@@ -8,6 +8,7 @@ import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import vehicleRouter from './routes/vehicleRoutes.js';
 import driverRouter from './routes/driverRoutes.js';
+import tripRouter from './routes/tripRoutes.js';
 import AppError from './utils/appError.js';
 
 // Load environment variables
@@ -31,6 +32,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/vehicles', vehicleRouter);
 app.use('/api/drivers', driverRouter);
+app.use('/api/trips', tripRouter);
 
 
 // Fallback for unhandled API routes
