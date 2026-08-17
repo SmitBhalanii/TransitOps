@@ -490,11 +490,23 @@ h1, h2, h3, h4, h5, h6 {
   color: #fca5a5;
 }
 
-/* Layout helpers */
+/* Layout helpers & Grids */
 .grid-2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
 }
 
 /* Empty States */
@@ -502,11 +514,16 @@ h1, h2, h3, h4, h5, h6 {
   text-align: center;
   padding: 48px 24px;
   color: var(--color-text-muted);
+  background-color: rgba(255, 255, 255, 0.01);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  margin: 12px 0;
 }
 
 .empty-state h3 {
   color: var(--color-text);
   margin-bottom: 8px;
+  font-size: 16px;
 }
 
 /* Loading Spinner */
@@ -518,8 +535,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 3px solid rgba(217, 119, 6, 0.1);
   border-top-color: var(--color-primary);
   border-radius: 50%;
@@ -530,12 +547,38 @@ h1, h2, h3, h4, h5, h6 {
   to { transform: rotate(360deg); }
 }
 
-/* Responsive */
-@media (max-width: 992px) {
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Modal and Glassmorphic Transitions */
+.card, .kpi-card, .table-container {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Responsive view modifications */
+@media (max-width: 1024px) {
   .app-container {
     grid-template-columns: 1fr;
   }
   .sidebar {
-    display: none; /* In future, we can add a mobile hamburger menu toggling */
+    display: none; /* Mobile side navigation */
   }
 }
+
