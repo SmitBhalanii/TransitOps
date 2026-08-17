@@ -6,6 +6,8 @@ import errorHandler from './middleware/errorMiddleware.js';
 import healthRouter from './routes/healthRoutes.js';
 import authRouter from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
+import vehicleRouter from './routes/vehicleRoutes.js';
+import driverRouter from './routes/driverRoutes.js';
 import AppError from './utils/appError.js';
 
 // Load environment variables
@@ -27,6 +29,8 @@ app.use(express.json());
 app.use('/api', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/vehicles', vehicleRouter);
+app.use('/api/drivers', driverRouter);
 
 
 // Fallback for unhandled API routes
