@@ -10,6 +10,8 @@ import vehicleRouter from './routes/vehicleRoutes.js';
 import driverRouter from './routes/driverRoutes.js';
 import tripRouter from './routes/tripRoutes.js';
 import maintenanceRouter from './routes/maintenanceRoutes.js';
+import fuelRouter from './routes/fuelRoutes.js';
+import expenseRouter from './routes/expenseRoutes.js';
 import AppError from './utils/appError.js';
 
 // Load environment variables
@@ -35,6 +37,8 @@ app.use('/api/vehicles', vehicleRouter);
 app.use('/api/drivers', driverRouter);
 app.use('/api/trips', tripRouter);
 app.use('/api/maintenance', maintenanceRouter);
+app.use('/api/fuel', fuelRouter);
+app.use('/api/expenses', expenseRouter);
 
 
 // Fallback for unhandled API routes

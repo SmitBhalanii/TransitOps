@@ -1,5 +1,6 @@
 import Maintenance from '../models/Maintenance.js';
 import Vehicle from '../models/Vehicle.js';
+import Expense from '../models/Expense.js';
 import AppError from '../utils/appError.js';
 
 // Retrieve all maintenance records
@@ -80,6 +81,15 @@ export const createMaintenance = async (req, res, next) => {
       status: initialStatus,
     });
 
+    // 2.5) Automatically create a corresponding Expense log to keep ledger synced
+    await Expense.create({
+      vehicle,
+      expenseType: 'Maintenance',
+      amount: cost,
+      date: date || new Date(),
+      description: `Maintenance: ${serviceType}. Notes: ${notes || ''}`,
+    });
+
     // 3) Re-evaluate and toggle vehicle status automatically
     if (initialStatus === 'Active') {
       targetVehicle.status = 'In Shop';
@@ -108,6 +118,7 @@ export const updateMaintenance = async (req, res, next) => {
     }
 
     const previousStatus = record.status;
+    const previousCost = record.cost;
 
     if (serviceType) record.serviceType = serviceType;
     if (cost !== undefined) record.cost = cost;
@@ -116,6 +127,24 @@ export const updateMaintenance = async (req, res, next) => {
     if (status) record.status = status;
 
     const updatedRecord = await record.save();
+
+    // Sync updates to corresponding Expense record
+    try {
+      await Expense.findOneAndUpdate(
+        {
+          vehicle: record.vehicle,
+          expenseType: 'Maintenance',
+          amount: previousCost,
+        },
+        {
+          amount: record.cost,
+          date: record.date,
+          description: `Maintenance: ${record.serviceType}. Notes: ${record.notes || ''}`,
+        }
+      );
+    } catch (err) {
+      console.error('Error syncing maintenance expense update:', err.message);
+    }
 
     // Re-evaluate vehicle status upon transitioning from Active -> Completed
     if (previousStatus === 'Active' && status === 'Completed') {
@@ -156,6 +185,13 @@ export const deleteMaintenance = async (req, res, next) => {
         await targetVehicle.save();
       }
     }
+
+    // Delete corresponding Expense log
+    await Expense.deleteOne({
+      vehicle: record.vehicle,
+      expenseType: 'Maintenance',
+      amount: record.cost,
+    });
 
     await Maintenance.findByIdAndDelete(req.params.id);
 
